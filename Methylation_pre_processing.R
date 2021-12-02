@@ -61,7 +61,8 @@ print(RGSet)
 outdir <- opt$out
 setwd(outdir)
 dir.create("QC/", showWarnings = FALSE)
-setwd(paste0(out,"QC/"))
+#setwd(paste0(out,"QC/"))
+setwd("QC/")
 
 # C.1. Plot quality control plots (package ENmix)
 plotCtrl(RGSet)
