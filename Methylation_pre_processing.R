@@ -40,10 +40,11 @@ ann <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 # crossreac file: "48639-non-specific-probes-Illumina450k.csv"
 
 # A) Load targets file
-targets <- read.table(opt$targets, h=T, sep=opt$sep)
+targets <- read.table(opt$targets, h=T, sep=opt$sep,
+                      colClasses=c("sentrix_position"="character"))
 # If targets file is a csv use: targets <- read.csv(opt$targets, header=TRUE)
 colnames(targets) <- tolower(colnames(targets))
-targets$barcode <- paste(targets$sentrix_id, targets$sentrix_pos, sep="_")
+#targets$barcode <- paste(targets$sentrix_id, targets$sentrix_pos, sep="_")
 rownames(targets) <- as.character(targets$barcode)
 targets$Basename <- rownames(targets)
 head(targets)
