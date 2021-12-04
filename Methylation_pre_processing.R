@@ -44,7 +44,9 @@ targets <- read.table(opt$targets, h=T, sep=opt$sep,
                       colClasses=c("sentrix_position"="character"))
 # If targets file is a csv use: targets <- read.csv(opt$targets, header=TRUE)
 colnames(targets) <- tolower(colnames(targets))
-#targets$barcode <- paste(targets$sentrix_id, targets$sentrix_pos, sep="_")
+targets$temp <- sapply(targets$barcode, function(x) strsplit(x, "_")[[1]][1])
+targets$sentrix_id <- targets$temp
+targets$barcode <- paste(targets$sentrix_id, targets$sentrix_pos, sep="_")
 rownames(targets) <- as.character(targets$barcode)
 targets$Basename <- rownames(targets)
 head(targets)
@@ -55,6 +57,8 @@ RGSet <- read.metharray.exp(base = opt$folder, targets = targets, recursive = T,
 targets$ID = paste(targets$sample_id)
 sampleNames(RGSet) = targets$ID
 print(RGSet)
+
+# Saving RGSet as .RData file: save(RGSet, file="RGSet.RData")
 
 # C) Quality Checks
 # Create output dir and QC dir within output dir
@@ -121,6 +125,7 @@ targets <- targets[keep.samples,]
 # E) Write files
 setwd(out)
 save(RGSet, file="RGSet.RData")
+
 save(MSet, file="MSet.RData")
 save(gset, file="gset.RData")
 
