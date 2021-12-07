@@ -15,6 +15,8 @@
 ### 3. Create datasets for analysis
 ## a) separate methylation probes into gene body, promoter, and enhancer regions
 # Read in beta and m-tables, use data.table::fread() with option data.table=FALSE for faster loading
+m_filt <- data.table::fread("./NormalisedFilteredMTable_noInf.csv", sep=",", h=T, data.table=F)
+beta <- data.table::fread("./NormalisedFilteredBetaTable.csv", sep=",", h=T, data.table=F)
 
 # Filter the beta and m tables to retain only probes with an absolute beta value difference of > 0.1
 beta.diff <- apply(beta, 1, max, na.rm=TRUE) - apply(beta, 1, min, na.rm=TRUE)
