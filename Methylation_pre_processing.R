@@ -39,6 +39,8 @@ library(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 ann <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19)
 # crossreac file: "48639-non-specific-probes-Illumina450k.csv"
 
+opt <- list(targets="./TargetsFile_95samples.csv", folder="./IDAT_files", sep=",")
+
 # A) Load targets file
 targets <- read.table(opt$targets, h=T, sep=opt$sep,
                       colClasses=c("sentrix_position"="character"))
@@ -57,6 +59,14 @@ RGSet <- read.metharray.exp(base = opt$folder, targets = targets, recursive = T,
 targets$ID = paste(targets$sample_id)
 sampleNames(RGSet) = targets$ID
 print(RGSet)
+
+load("RGSet.RData")
+load("MSet.RData")
+load("gset.RData")
+load("Fun.RData")
+load("Fun1.RData")
+load("Fun2.RData")
+load("Fun3.RData")
 
 # Saving RGSet as .RData file: save(RGSet, file="RGSet.RData")
 
@@ -125,7 +135,6 @@ targets <- targets[keep.samples,]
 # E) Write files
 setwd(out)
 save(RGSet, file="RGSet.RData")
-
 save(MSet, file="MSet.RData")
 save(gset, file="gset.RData")
 
@@ -203,7 +212,8 @@ targets[targets$sex != targets$predSex,]
 
 # I) Normalization
 # includes NOOB background/dye correction
-fun <- preprocessFunnorm(RGSet) # If clinical sex is available can use preprocessFunnorm(RGSet, sex=targets$sex), default of sex=NULL uses function getSex to guess the sex
+#fun <- preprocessFunnorm(RGSet) # If clinical sex is available can use preprocessFunnorm(RGSet, sex=targets$sex), default of sex=NULL uses function getSex to guess the sex
+fun <- preprocessFunnorm(RGSet, sex=targets$sex)
 size.fun <- as.data.frame(t(dim(fun)))
 save(fun, file = "Fun.RData")
 
