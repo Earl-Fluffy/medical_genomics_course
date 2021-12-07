@@ -15,16 +15,19 @@
 ### 3. Create datasets for analysis
 ## a) separate methylation probes into gene body, promoter, and enhancer regions
 # Read in beta and m-tables, use data.table::fread() with option data.table=FALSE for faster loading
-m_filt <- data.table::fread("./NormalisedFilteredMTable_noInf.csv", sep=",", h=T, data.table=F)
+m <- data.table::fread("./NormalisedFilteredMTable.csv", sep=",", h=T, data.table=F)
 beta <- data.table::fread("./NormalisedFilteredBetaTable.csv", sep=",", h=T, data.table=F)
 
 # Filter the beta and m tables to retain only probes with an absolute beta value difference of > 0.1
+rownames(beta) <- beta$V1
+beta <- beta[-1]
 beta.diff <- apply(beta, 1, max, na.rm=TRUE) - apply(beta, 1, min, na.rm=TRUE)
 names(beta.diff) <- rownames(beta)
 length(beta.diff) 
 beta.diff <- beta.diff[which(beta.diff > 0.1)]
 length(beta.diff) 
 # How many probes remain? What proportion of the original probes passed this filter?
+# 711,094 probes remains, difference of ~110,000
 m_filt <- m[which(rownames(m) %in% names(beta.diff)), ]
 beta_filt <- beta[which(rownames(beta) %in% names(beta.diff)), ]
 
@@ -38,6 +41,17 @@ ann$class <- sapply(1:nrow(ann), function(x)
   else if(ann$Regulatory_Feature_Group[x] != "Promoter_Associated" & ann$Phantom5_Enhancers[x] == "" & !grepl("Body|Exon", ann$UCSC_RefGene_Group[x])){NA})
 
 # Subset the m_filt tables into three: m_pro, m_enh, and m_bod using the class labels for each probe you generated above
+rownames(m_filt) <- m_filt$V1
+ann$V1 <- rownames(ann)
+m_ann <- merge(m_filt, ann[c('V1', 'class')], by="V1", all.x=T, all.y=F)
+print(nrow(m_ann) == nrow(m_filt))
+m_ann <- m_ann[!is.na(m_ann$class), ]
+m_pro <- m_ann[m_ann$class == "Promoter", ]
+m_enh <- m_ann[m_ann$class == "Enhancer", ]
+m_bod <- m_ann[m_ann$class == "Body", ]
+write.table(m_pro, file="promoter.csv", sep=",", col.names=NA)
+write.table(m_enh, file="enhancer.csv", sep=",", col.names=NA)
+write.table(m_bod, file="genebody.csv", sep=",", col.names=NA)
 
 ## b) select the 5,000 most variable sites in each and combine into a single dataset
 # Shrink the m_xxx tables to retain only the 5,000 most variable probes, create matching beta_xxx tables, follow the method shown here for m_pro
